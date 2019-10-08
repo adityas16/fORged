@@ -63,20 +63,27 @@ TES=function(series,slen=12,alpha=0.5,beta=0.5,gamma=0.5,n_preds=12){
   for(ii in 2:length(series)){#fitting training data
     yy=ceiling(ii/12)
     mm=ii%%12+(ii%%12==0)*12
-    results[ii]=(s[ii-1]+(ii%%12==1)*year_trend)*meanP[mm]
+    results[ii]=(s[ii-1])*meanP[mm]
     residual[ii]=results[ii]-series[ii]
-    s[ii]=alpha*series[ii]/meanP[mm]+(1-alpha)*(s[ii-1]+(ii%%12==1)*year_trend/meanP[mm]) #after observing series[ii]
+    if(ii%%3==1){
+      s[ii]=gamma*series[ii]/meanP[mm]+(1-gamma)*(s[ii-1])
+    }
+    else{
+      s[ii]=alpha*series[ii]/meanP[mm]+(1-alpha)*(s[ii-1]+(ii%%12==0)*year_trend)  
+    }
+    
     if(ii%%12==1){
+      print(year_trend)
       year_trend=beta*(s[ii]-s[ii-1])+(1-beta)*year_trend
     }
-    meanP[mm]=gamma*series[ii]/s[ii]+(1-gamma)*meanP[mm]
+    #meanP[mm]=gamma*series[ii]/s[ii]+(1-gamma)*meanP[mm]
   }
   if(n_preds>0){
   for(hh in 1:n_preds){ #predicting
     ii=length(series)+hh
     yy=ceiling(ii/12)
     mm=ii%%12+(ii%%12==0)*12
-    s[ii]=s[ii-1]+(ii%%12==1)*year_trend
+    s[ii]=s[ii-1]
     results[ii]=s[ii]*meanP[mm]
   }
   }
