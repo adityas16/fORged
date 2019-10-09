@@ -1,5 +1,5 @@
 
-############################## Inventory control: 2004-2005 ##########################################################
+############################## Inventory control:  ##########################################################
 inventory_control = function(predictions,true_demand){
 control=data.frame(month=as.numeric(TEST_MONTHS), 
                    beginning_inventory=as.numeric(1:24),order_quantity=as.numeric(1:24),ending_inventory=as.numeric(1:24),
@@ -37,5 +37,3 @@ mean(tail(control$total_cost,-1))
 
 control[,1:7]
 }
-
-inventory_control(predictions,data.test)

@@ -1,19 +1,6 @@
-library(forecast)
-setwd(getSrcDirectory()[1])
 source("constants.R")
 
-
-###########################################################################################
-############# Data preparation ####################################################
-data=read.csv("Ten-Year-Demand.csv")
-data.train=data[TRAINING_MONTHS,'x']
-data.test=data[TEST_MONTHS,'x']
-
-#################################################################################
-##########################################################################################################################################
-
-
-###############################################################################################################################################################################################################
+#Initiaize hyperparameters
 initial_trend=function(series,slen=12){ #calculate b_{t/slen}, yearly trend
   ys=floor(length(series)/12) #years in training data
   YSAVG=1:ys
@@ -37,12 +24,12 @@ get_month =function(month_number){
   month_number%%12+(month_number%%12==0)*12
 }
 
+#Fit training data given a set of hyperparameters
 STES=function(series,hyper_parameters){
   slen=12
   alpha_month=hyper_parameters$alpha_month
-  alpha_quarter=hyper_parameters$alpa
+  alpha_quarter=hyper_parameters$alpha_quarter
   beta=hyper_parameters$beta
-  
   initials=initial_trend(series,slen)
   year_trend=initials$year_trend
   meanP=initials$meanP
@@ -75,8 +62,8 @@ STES=function(series,hyper_parameters){
   mm=get_month(ii)
   s[ii]=s[ii-1]
   predicted_mu=s[ii]*meanP[mm]
-  relevant_months = get_month(2:96)==mm
-  relevant_residuals = residual[2:length(residuals)][relevant_months]
+  relevant_months = get_month(2:length(series))==mm
+  relevant_residuals = residual[2:length(residual)][relevant_months]
   relevant_residuals = relevant_residuals - mean(relevant_residuals)
   ssr = sum(relevant_residuals^2)
   predicted_sigma = sqrt(ssr/(sum(relevant_months)-1))
