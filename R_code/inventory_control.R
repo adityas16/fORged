@@ -1,56 +1,41 @@
 
 ############################## Inventory control: 2004-2005 ##########################################################
-control=data.frame(month=as.numeric(97:120),pp_demand=predictions$pred,pp_demand_sd=predictions$sd,true_demand=data.test,
-                   starting_inventory=as.numeric(1:24),replenishment=as.numeric(1:24),ending_inventory=as.numeric(1:24),
+inventory_control = function(predictions,true_demand){
+control=data.frame(month=as.numeric(TEST_MONTHS), 
+                   beginning_inventory=as.numeric(1:24),order_quantity=as.numeric(1:24),ending_inventory=as.numeric(1:24),
+                   holding_cost=as.numeric(1:24),backorder_cost=as.numeric(1:24),total_cost=as.numeric(1:24),
+                   pp_demand=predictions$pred,pp_demand_sd=predictions$sd,true_demand=true_demand,
                    next_inventory_goal=as.numeric(1:24))
 colnames(control)
 #starting: made up from excel sheet
-control[1,'starting_inventory']=81
-control[1,'ending_inventory']=-8.88
-control[1,'replenishment']=control[1,'ending_inventory']-control[1,'starting_inventory']+control[1,'true_demand']
+incoming_order_quantity =0
+prev_end_inventory = 60
 
-for(mm in 97:120){
-  index=mm-96
-  control[index,'ending_inventory']=control[index,'starting_inventory']+control[index,'replenishment']-control[index,'true_demand']
-  if(mm<120){
-    control[index,'next_inventory_goal']=qnorm(3/4)*control[index+1,'pp_demand_sd']+control[index+1,'pp_demand'] #make replenishment decisions at the end of each period, after backorders are fulfilled
-    control[index+1,'replenishment']=max(0,control[index,'next_inventory_goal']-max(0,control[index,'ending_inventory']))
-    control[index+1,'starting_inventory']=max(0,control[index,'ending_inventory'])
+index=1
+for(mm in TEST_MONTHS){
+  control[index,]$beginning_inventory = prev_end_inventory + incoming_order_quantity
+  control[index,]$ending_inventory = control[index,]$beginning_inventory - control[index,]$true_demand
+  
+  if(mm < TEST_MONTHS[length(TEST_MONTHS)]){
+    control[index,]$next_inventory_goal = 0.6744898 *control[index+1,]$pp_demand_sd + control[index+1,]$pp_demand
   }
-}
-
-control$cost=0
-for(mm in 97:120){
-  index=mm-96
-  control[index,'cost']=(control[index,'ending_inventory']>0)*control[index,'ending_inventory']+(control[index,'ending_inventory']<0)*3*(-control[index,'ending_inventory'])
-}
-sum(control[2:24,'cost'])/24 #2.36
-
-############################## Inventory control: 1996-2005 ##########################################################
-control=data.frame(month=as.numeric(1:120),pp_demand=predictions$pred,pp_demand_sd=predictions$sd,true_demand=data.test,
-                   starting_inventory=as.numeric(1:120),replenishment=as.numeric(1:120),ending_inventory=as.numeric(1:120),
-                   next_inventory_goal=as.numeric(1:120))
-colnames(control)
-
-control[1:96,'pp_demand']=fitting$results[1:96]
-control[1:96,'pp_demand_sd']=sd(fitting$res)
-control[1:96,'true_demand']=data.train
-control[1,'starting_inventory']=60
-control[1,'replenishment']=0
-control[1,'ending_inventory']
-
-for(index in 1:120){
-  control[index,'ending_inventory']=control[index,'starting_inventory']+control[index,'replenishment']-control[index,'true_demand']
-  if(index<120){
-    control[index,'next_inventory_goal']=qnorm(3/4)*control[index+1,'pp_demand_sd']+control[index+1,'pp_demand'] #make replenishment decisions at the end of each period, after backorders are fulfilled
-    control[index+1,'replenishment']=max(0,control[index,'next_inventory_goal']-max(0,control[index,'ending_inventory']))
-    control[index+1,'starting_inventory']=max(0,control[index,'ending_inventory'])
+  else{
+    control[index,]$next_inventory_goal = 73
   }
+  control[index,'order_quantity']=max(0,control[index,'next_inventory_goal']-control[index,'ending_inventory'])
+  
+  prev_end_inventory = control[index,]$ending_inventory
+  incoming_order_quantity = control[index,]$order_quantity
+  index = index + 1
 }
 
-control$cost=0
-for(index in 1:120){
-  control[index,'cost']=(control[index,'ending_inventory']>0)*control[index,'ending_inventory']+(control[index,'ending_inventory']<0)*3*(-control[index,'ending_inventory'])
-}
-sum(control$cost)/120 #3.438
+control$holding_cost = (control$ending_inventory>0)*control$ending_inventory
+control$backorder_cost = (control$ending_inventory<0)*3*(-control$ending_inventory)
+control$total_cost= control$holding_cost + control$backorder_cost
 
+mean(tail(control$total_cost,-1))
+
+control[,1:7]
+}
+
+inventory_control(predictions,data.test)

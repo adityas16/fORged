@@ -37,7 +37,12 @@ get_month =function(month_number){
   month_number%%12+(month_number%%12==0)*12
 }
 
-STES=function(series,slen=12,alpha_month=0.5,beta=0.5,alpha_quarter=0.5){
+STES=function(series,hyper_parameters){
+  slen=12
+  alpha_month=hyper_parameters$alpha_month
+  alpha_quarter=hyper_parameters$alpa
+  beta=hyper_parameters$beta
+  
   initials=initial_trend(series,slen)
   year_trend=initials$year_trend
   meanP=initials$meanP
