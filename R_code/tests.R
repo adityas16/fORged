@@ -11,8 +11,8 @@ rmse=data.frame(alpha_month=as.numeric(),beta=as.numeric(),alpha_quarter=as.nume
 for(aa in 1:9){
   for(bb in 1:9){
     for(gg in 1:9){
-      fitting=TES(data.train,12,alpha_month=aa/10,beta=bb/10,alpha_quarter=gg/10,n_preds=0) #fit+predict
-      pred=fitting$results
+      fitting=STES(data.train,12,alpha_month=aa/10,beta=bb/10,alpha_quarter=gg/10) #fit+predict
+      pred=fitting$fitted
       true=data.train
       error1=abs(true-pred)
       se=sqrt(sum(t(error1)%*%error1)/length(true))
@@ -24,9 +24,9 @@ ggplot(rmse, aes(alpha_month,beta)) + geom_point(aes(size = rmse))
 
 plot(rmse$alpha_month,rmse$rmse)
 best=rmse[which(rmse$rmse==min(rmse$rmse)),][1,]
-best #alpha_month, beta, alpha_quarter, rmse: 0.3,0.1,0.5, 1.822738
-#alpha_month beta alpha_quarter   rmse
-#559   0.7  0.9   0.1 2.944
+best
+#alpha_month beta alpha_quarter     rmse
+#332         0.5  0.1           0.8 2.851543
 
 
 
@@ -38,8 +38,8 @@ nn=24
 predictions=data.frame(pred=as.numeric(1:nn),sd=as.numeric(1:nn))
 newdata=data.train
 for(pp in 1:nn){ #predicting
-  fitting=TES(newdata,12,alpha_month=best$alpha_month,beta=best$beta,alpha_quarter=best$alpha_quarter,n_preds=1)
-  predictions[pp,]=c(fitting$results[length(newdata)+1],fitting$resSD)
+  fitting=STES(newdata,12,alpha_month=best$alpha_month,beta=best$beta,alpha_quarter=best$alpha_quarter)
+  predictions[pp,]=c(fitting$prediction["mu"],fitting$prediction["sigma"])
   newdata=c(newdata,data[length(newdata)+1,'x'])
 }
 
@@ -51,7 +51,7 @@ plot(predictions$error)
 #2.23. Inbuilt ETS = 2.46
 #Without yearly trend: 2.15
 #With trend = 2.33
-#With quarter weights: 2.05
+#With quarter weights:  2.05305
 
 
 
