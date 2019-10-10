@@ -11,7 +11,7 @@ To run the code:
 Run the command : `<Path to R installation>/bin/Rscript main.R` for linux or `<Path to R installation>\bin\Rscript.exe main.R` for windows
 4. The output will be written to two files: 
    - `inventory_state.csv` contains the state of the inventory at the beginning and end of the month, quantity ordered and the costs for each of the 24 months from 121-144
-   - `aggregate_stats.csv` contains the 
+   - `aggregate_stats.csv`  contains the mean and total backorder and holding costs over all periods.
 5. Samples of all the input file and the 2 output files have been included in the 'samples' folder
 
 Possible errors:
