@@ -7,7 +7,7 @@ source("inventory_control.R")
 #Read demand from input file
 demand.train=read.csv("Ten-Year-Demand.csv")[,'x']
 demand.test=read.csv("Test-Demand.csv")[,'x']
-demand=c(demand.test,demand.train)
+demand=c(demand.train,demand.test)
 
 #Estiamte hyper parameters needed by STES
 hyper_parameters = estimate_hyper_parameters(demand.train)
